@@ -769,38 +769,32 @@ void Teacher::addGrade() {
     if (courses.empty()) {
         cout << "No courses available.\n";
         system("pause");
-        return; 
+        return;
     }
 
-    
-    vector<Course> assignedCourses;
-
-    // Filter courses to find those assigned to the current teacher
-    for (const auto& course : courses) {
-        if (course.getTeacherEmail() == getEmail()) {
-            assignedCourses.push_back(course);
+    // Display only courses assigned to this teacher
+    vector<int> assignedCourseIndices;  // Store indices instead of copies
+    cout << "Your Assigned Courses:\n";
+    for (size_t i = 0; i < courses.size(); ++i) {
+        if (courses[i].getTeacherEmail() == getEmail()) {
+            cout << assignedCourseIndices.size() + 1 << ". " << courses[i].getCourseName() << endl;
+            assignedCourseIndices.push_back(i);
         }
     }
 
-   
-    if (assignedCourses.empty()) {
+    if (assignedCourseIndices.empty()) {
         cout << "You are not assigned to any courses. Cannot add grades.\n";
         system("pause");
-        return; // Exit if no courses are assigned
+        return;
     }
 
-   
-    cout << "Your Assigned Courses:\n";
-    for (size_t i = 0; i < assignedCourses.size(); ++i) {
-        cout << i + 1 << ". " << assignedCourses[i].getCourseName() << endl;
-    }
-
-    int courseIndex = Validator::getValidatedIntInput(
-        "Enter course index (1-" + to_string(assignedCourses.size()) + "): ",
-        1, assignedCourses.size());
+    int courseChoice = Validator::getValidatedIntInput(
+        "Enter course index (1-" + to_string(assignedCourseIndices.size()) + "): ",
+        1, assignedCourseIndices.size());
 
     try {
-        Course& course = assignedCourses[courseIndex - 1]; 
+        // Get reference to the actual course in LMS
+        Course& course = courses[assignedCourseIndices[courseChoice - 1]];
         
         string studentEmail;
         bool validEmail = false;
@@ -814,7 +808,6 @@ void Teacher::addGrade() {
             }
         } while (!validEmail);
 
-       
         bool studentFound = false;
         for (const string& student : course.getStudents()) {
             if (student == studentEmail) {
@@ -833,7 +826,7 @@ void Teacher::addGrade() {
             "Enter grade (0-100): ",
             0, 100);
 
-        course.addGrade(studentEmail, grade);
+        course.addGrade(studentEmail, grade);  // This now modifies the actual course
         cout << "Grade added successfully for student: " << studentEmail << endl;
         system("pause");
     } catch (const exception& e) {
@@ -1066,7 +1059,7 @@ void Teacher::viewReports() {
             course.displayStudents();
             cout << "Grades:\n";
             course.displayGrades();
-        system("pause"); 
+            
             cout << "----------------------\n";
         }
     }
